@@ -1,9 +1,9 @@
 package client
 
 import (
+	pb "github.com/ThibaultRiviere/levelgrpc/proto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	pb "google.golang.org/grpc/examples/levelgrpc/proto"
 	"log"
 )
 
