@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func benchGetObject(database *string, key *string, nb_parallel int, nb_reqs int) {
+func benchGetObject(key string, nb_parallel int, nb_reqs int) {
 
 	end := make(chan string, nb_parallel)
 
@@ -21,8 +21,8 @@ func benchGetObject(database *string, key *string, nb_parallel int, nb_reqs int)
 	for i := 0; i < nb_parallel; i++ {
 		go func() {
 			for i := 0; i < nb_reqs; i++ {
-				k := *key + strconv.Itoa(i)
-				_, err := c.GetObject(database, &k)
+				key := []byte(key + strconv.Itoa(i))
+				_, err := c.GetObject(key)
 				if err != nil {
 					end <- "error can't get :" + strconv.Itoa(i)
 					return
@@ -36,10 +36,10 @@ func benchGetObject(database *string, key *string, nb_parallel int, nb_reqs int)
 	}
 }
 
-func benchPutObject(d *string, k *string, nb_parallel int, nb_reqs int, size int) {
+func benchPutObject(key string, nb_parallel int, nb_reqs int, size int) {
 
 	end := make(chan string, nb_parallel)
-	value := str.NewLen(size)
+	value := []byte(str.NewLen(size))
 
 	c, err := pb.NewClient()
 	if err != nil {
@@ -50,10 +50,10 @@ func benchPutObject(d *string, k *string, nb_parallel int, nb_reqs int, size int
 	for i := 0; i < nb_parallel; i++ {
 		go func() {
 			for i := 0; i < nb_reqs; i++ {
-				key := *k + strconv.Itoa(i)
-				err := c.PutObject(d, &key, &value)
+				key := []byte(key + strconv.Itoa(i))
+				err := c.PutObject(key, value)
 				if err != nil {
-					end <- "error can't get: " + key
+					end <- "error can't get: " + string(key)
 					return
 				}
 			}
@@ -66,12 +66,11 @@ func benchPutObject(d *string, k *string, nb_parallel int, nb_reqs int, size int
 }
 
 func main() {
-	cmd := flag.String("cmd", "unknow", "command to execute")
-	db := flag.String("db", "foo", "database name")
-	key := flag.String("key", "bar", "key name")
+	cmd := flag.String("c", "unknow", "command to execute")
 	parallel := flag.String("p", "1", "parallel reqs")
-	requests := flag.String("req", "1", "nb reqs")
+	requests := flag.String("r", "1", "nb reqs")
 	size := flag.String("s", "8", "size of the string for put bench")
+	key := flag.String("k", "key/", "base for the key")
 
 	flag.Parse()
 
@@ -81,9 +80,9 @@ func main() {
 
 	switch *cmd {
 	case "get":
-		benchGetObject(db, key, nb_parallel, nb_reqs)
+		benchGetObject(*key, nb_parallel, nb_reqs)
 	case "put":
-		benchPutObject(db, key, nb_parallel, nb_reqs, val_size)
+		benchPutObject(*key, nb_parallel, nb_reqs, val_size)
 	default:
 		fmt.Println("Usage: <cmd> <db> <key> | <value>")
 	}
