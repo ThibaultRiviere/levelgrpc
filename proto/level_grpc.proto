@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+// Begin leveDB package
+
+package levelgrpc;
+
+message PutObject {
+    string database = 1;
+    string key = 2;
+    string value = 3;
+}
+
+message GetObject {
+    string database = 1;
+    string key = 2;
+}
+
+message Response {
+    string res = 1;
+    string value = 2;
+}
+
+service LevelDB {
+    rpc Put(PutObject) returns (Response) {}
+    rpc Get(GetObject) returns (Response) {}
+}
