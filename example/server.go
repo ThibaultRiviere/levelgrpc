@@ -1,7 +1,7 @@
 package main
 
 import (
-	levelgrpc "google.golang.org/grpc/examples/levelgrpc/server"
+	levelgrpc "github.com/ThibaultRiviere/levelgrpc/server"
 	"log"
 	"net"
 )

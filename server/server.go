@@ -2,10 +2,10 @@ package server
 
 import (
 	"fmt"
+	pb "github.com/ThibaultRiviere/levelgrpc/proto"
 	"github.com/syndtr/goleveldb/leveldb"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	pb "google.golang.org/grpc/examples/levelgrpc/proto"
 	"net"
 )
 

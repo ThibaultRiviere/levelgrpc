@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	pb "github.com/ThibaultRiviere/levelgrpc/client"
 	str "github.com/dchest/uniuri"
-	pb "google.golang.org/grpc/examples/levelgrpc/client"
 	"strconv"
 )
 
