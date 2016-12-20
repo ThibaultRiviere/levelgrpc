@@ -12,24 +12,24 @@ func benchGetObject(key string, nb_parallel int, nb_reqs int) {
 
 	end := make(chan string, nb_parallel)
 
-	c, err := pb.NewClient()
-	if err != nil {
-		end <- "error can't create client with leveldb server"
-		return
-	}
-
 	for i := 0; i < nb_parallel; i++ {
-		go func() {
-			for i := 0; i < nb_reqs; i++ {
-				key := []byte(key + strconv.Itoa(i))
-				_, err := c.GetObject(key)
+		client, err := pb.NewClient()
+		if err != nil {
+			end <- "error can't create client with leveldb server"
+			return
+		}
+
+		go func(c pb.Client, k string, e chan string, max int) {
+			for i := 0; i < max; i++ {
+				key_i := []byte(k + strconv.Itoa(i))
+				_, err := c.GetObject(key_i)
 				if err != nil {
-					end <- "error can't get :" + strconv.Itoa(i)
+					e <- "error can't get :" + strconv.Itoa(i)
 					return
 				}
 			}
-			end <- "No errors ..."
-		}()
+			e <- "No errors ..."
+		}(client, key, end, nb_reqs)
 	}
 	for i := 0; i < nb_parallel; i++ {
 		fmt.Println(<-end)
@@ -41,24 +41,24 @@ func benchPutObject(key string, nb_parallel int, nb_reqs int, size int) {
 	end := make(chan string, nb_parallel)
 	value := []byte(str.NewLen(size))
 
-	c, err := pb.NewClient()
-	if err != nil {
-		end <- "error can't create client with leveldb server"
-		return
-	}
-
 	for i := 0; i < nb_parallel; i++ {
-		go func() {
-			for i := 0; i < nb_reqs; i++ {
-				key := []byte(key + strconv.Itoa(i))
-				err := c.PutObject(key, value)
+		client, err := pb.NewClient()
+		if err != nil {
+			end <- "error can't create client with leveldb server"
+			return
+		}
+
+		go func(c pb.Client, k string, v []byte, e chan string, max int) {
+			for i := 0; i < max; i++ {
+				key_i := []byte(k + strconv.Itoa(i))
+				err := c.PutObject(key_i, v)
 				if err != nil {
-					end <- "error can't get: " + string(key)
+					e <- "error can't get: " + string(key)
 					return
 				}
 			}
-			end <- "No errors ..."
-		}()
+			e <- "No errors ..."
+		}(client, key, value, end, nb_reqs)
 	}
 	for i := 0; i < nb_parallel; i++ {
 		fmt.Println(<-end)
