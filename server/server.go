@@ -14,38 +14,30 @@ type Server struct {
 	server *grpc.Server
 }
 
-func (s *Server) _put(db string, key string, value string) error {
-	k := db + "/" + key
-	//fmt.Println("Putting : ", k, ":", value)
-	return s.db.Put([]byte(k), []byte(value), nil)
+func (s *Server) _put(key []byte, value []byte) error {
+	return s.db.Put(key, value, nil)
 }
 
-func (s *Server) _get(db string, key string) (string, error) {
-	k := db + "/" + key
-	val, err := s.db.Get([]byte(k), nil)
-	if err != nil {
-		return "", err
-	}
-	//fmt.Println("Getting : ", key, ":", value)
-	return string(val), nil
+func (s *Server) _get(key []byte) ([]byte, error) {
+	return s.db.Get(key, nil)
 }
 
-func (s *Server) Put(c context.Context, m *pb.PutObject) (*pb.Response, error) {
-	err := s._put(m.GetDatabase(), m.GetKey(), m.GetValue())
+func (s *Server) Put(c context.Context, m *pb.PutRequest) (*pb.Response, error) {
+	err := s._put(m.GetKey(), m.GetValue())
 	if err != nil {
 		fmt.Println("put error : ", err)
-		return &pb.Response{"nok", ""}, err
+		return &pb.Response{true, nil}, err
 	}
-	return &pb.Response{"ok", ""}, nil
+	return &pb.Response{false, nil}, nil
 }
 
-func (s *Server) Get(c context.Context, m *pb.GetObject) (*pb.Response, error) {
-	data, err := s._get(m.GetDatabase(), m.GetKey())
+func (s *Server) Get(c context.Context, m *pb.GetRequest) (*pb.Response, error) {
+	data, err := s._get(m.GetKey())
 	if err != nil {
 		fmt.Println("get error : ", err)
-		return &pb.Response{"nok", ""}, err
+		return &pb.Response{true, nil}, err
 	}
-	return &pb.Response{"ok", data}, nil
+	return &pb.Response{false, data}, nil
 }
 
 func (s *Server) Serve(lis net.Listener) error {

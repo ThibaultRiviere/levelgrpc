@@ -28,22 +28,22 @@ func NewClient() (Client, error) {
 	return Client{pb.NewLevelDBClient(conn)}, nil
 }
 
-func (c *Client) GetObject(database *string, key *string) (string, error) {
+func (c *Client) GetObject(key []byte) ([]byte, error) {
 	a := context.Background()
-	b := &pb.GetObject{*database, *key}
+	b := &pb.GetRequest{key}
 
 	res, err := c.conn.Get(a, b)
 
 	if err != nil {
 		log.Fatalf("did not get: %v", err)
-		return "", err
+		return nil, err
 	}
 	return res.GetValue(), nil
 }
 
-func (c *Client) PutObject(database *string, key *string, value *string) error {
+func (c *Client) PutObject(key []byte, value []byte) error {
 	a := context.Background()
-	b := &pb.PutObject{*database, *key, *value}
+	b := &pb.PutRequest{key, value}
 
 	_, err := c.conn.Put(a, b)
 	return err
