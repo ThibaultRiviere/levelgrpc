@@ -48,3 +48,12 @@ func (c *Client) PutObject(key []byte, value []byte) error {
 	_, err := c.conn.Put(a, b)
 	return err
 }
+
+func (c *Client) DelObject(key []byte) error {
+	a := context.Background()
+	b := &pb.DelRequest{key}
+
+	_, err := c.conn.Del(a, b)
+	return err
+
+}
