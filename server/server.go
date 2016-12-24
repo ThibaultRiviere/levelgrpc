@@ -22,6 +22,19 @@ func (s *Server) _get(key []byte) ([]byte, error) {
 	return s.db.Get(key, nil)
 }
 
+func (s *Server) _del(key []byte) error {
+	return s.db.Delete(key, nil)
+}
+
+func (s *Server) Del(c context.Context, m *pb.DelRequest) (*pb.Response, error) {
+	err := s._del(m.GetKey())
+	if err != nil {
+		fmt.Println("del error : ", err)
+		return &pb.Response{true, nil}, err
+	}
+	return &pb.Response{false, nil}, nil
+}
+
 func (s *Server) Put(c context.Context, m *pb.PutRequest) (*pb.Response, error) {
 	err := s._put(m.GetKey(), m.GetValue())
 	if err != nil {
