@@ -65,6 +65,34 @@ func benchPutObject(key string, nb_parallel int, nb_reqs int, size int) {
 	}
 }
 
+func benchDelObject(key string, nb_parallel int, nb_reqs int) {
+
+	end := make(chan string, nb_parallel)
+
+	for i := 0; i < nb_parallel; i++ {
+		client, err := pb.NewClient()
+		if err != nil {
+			end <- "error can't create client with leveldb server"
+			return
+		}
+
+		go func(c pb.Client, k string, e chan string, max int) {
+			for i := 0; i < max; i++ {
+				key_i := []byte(k + strconv.Itoa(i))
+				err := c.DelObject(key_i)
+				if err != nil {
+					e <- "error can't get :" + strconv.Itoa(i)
+					return
+				}
+			}
+			e <- "No errors ..."
+		}(client, key, end, nb_reqs)
+	}
+	for i := 0; i < nb_parallel; i++ {
+		fmt.Println(<-end)
+	}
+}
+
 func main() {
 	cmd := flag.String("c", "unknow", "command to execute")
 	parallel := flag.String("p", "1", "parallel reqs")
@@ -83,6 +111,8 @@ func main() {
 		benchGetObject(*key, nb_parallel, nb_reqs)
 	case "put":
 		benchPutObject(*key, nb_parallel, nb_reqs, val_size)
+	case "del":
+		benchDelObject(*key, nb_parallel, nb_reqs)
 	default:
 		fmt.Println("Usage: <cmd> <db> <key> | <value>")
 	}
