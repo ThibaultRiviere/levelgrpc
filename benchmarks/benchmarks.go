@@ -26,11 +26,11 @@ import (
 	"strconv"
 )
 
-func benchGetObject(key string, nb_parallel int, nb_reqs int) {
+func benchGetObject(key string, nbParallel int, nbReqs int) {
 
-	end := make(chan string, nb_parallel)
+	end := make(chan string, nbParallel)
 
-	for i := 0; i < nb_parallel; i++ {
+	for i := 0; i < nbParallel; i++ {
 		client, err := pb.NewClient()
 		if err != nil {
 			end <- "error can't create client with leveldb server"
@@ -39,27 +39,27 @@ func benchGetObject(key string, nb_parallel int, nb_reqs int) {
 
 		go func(c pb.Client, k string, e chan string, max int) {
 			for i := 0; i < max; i++ {
-				key_i := []byte(k + strconv.Itoa(i))
-				_, err := c.GetObject(key_i)
+				keyI := []byte(k + strconv.Itoa(i))
+				_, err := c.GetObject(keyI)
 				if err != nil {
 					e <- "error can't get :" + strconv.Itoa(i)
 					return
 				}
 			}
 			e <- "No errors ..."
-		}(client, key, end, nb_reqs)
+		}(client, key, end, nbReqs)
 	}
-	for i := 0; i < nb_parallel; i++ {
+	for i := 0; i < nbParallel; i++ {
 		fmt.Println(<-end)
 	}
 }
 
-func benchPutObject(key string, nb_parallel int, nb_reqs int, size int) {
+func benchPutObject(key string, nbParallel int, nbReqs int, size int) {
 
-	end := make(chan string, nb_parallel)
+	end := make(chan string, nbParallel)
 	value := []byte(str.NewLen(size))
 
-	for i := 0; i < nb_parallel; i++ {
+	for i := 0; i < nbParallel; i++ {
 		client, err := pb.NewClient()
 		if err != nil {
 			end <- "error can't create client with leveldb server"
@@ -68,26 +68,26 @@ func benchPutObject(key string, nb_parallel int, nb_reqs int, size int) {
 
 		go func(c pb.Client, k string, v []byte, e chan string, max int) {
 			for i := 0; i < max; i++ {
-				key_i := []byte(k + strconv.Itoa(i))
-				err := c.PutObject(key_i, v)
+				keyI := []byte(k + strconv.Itoa(i))
+				err := c.PutObject(keyI, v)
 				if err != nil {
 					e <- "error can't get: " + string(key)
 					return
 				}
 			}
 			e <- "No errors ..."
-		}(client, key, value, end, nb_reqs)
+		}(client, key, value, end, nbReqs)
 	}
-	for i := 0; i < nb_parallel; i++ {
+	for i := 0; i < nbParallel; i++ {
 		fmt.Println(<-end)
 	}
 }
 
-func benchDelObject(key string, nb_parallel int, nb_reqs int) {
+func benchDelObject(key string, nbParallel int, nbReqs int) {
 
-	end := make(chan string, nb_parallel)
+	end := make(chan string, nbParallel)
 
-	for i := 0; i < nb_parallel; i++ {
+	for i := 0; i < nbParallel; i++ {
 		client, err := pb.NewClient()
 		if err != nil {
 			end <- "error can't create client with leveldb server"
@@ -96,17 +96,17 @@ func benchDelObject(key string, nb_parallel int, nb_reqs int) {
 
 		go func(c pb.Client, k string, e chan string, max int) {
 			for i := 0; i < max; i++ {
-				key_i := []byte(k + strconv.Itoa(i))
-				err := c.DelObject(key_i)
+				keyI := []byte(k + strconv.Itoa(i))
+				err := c.DelObject(keyI)
 				if err != nil {
 					e <- "error can't get :" + strconv.Itoa(i)
 					return
 				}
 			}
 			e <- "No errors ..."
-		}(client, key, end, nb_reqs)
+		}(client, key, end, nbReqs)
 	}
-	for i := 0; i < nb_parallel; i++ {
+	for i := 0; i < nbParallel; i++ {
 		fmt.Println(<-end)
 	}
 }
@@ -120,17 +120,17 @@ func main() {
 
 	flag.Parse()
 
-	nb_parallel, _ := strconv.Atoi(*parallel)
-	nb_reqs, _ := strconv.Atoi(*requests)
-	val_size, _ := strconv.Atoi(*size)
+	nbParallel, _ := strconv.Atoi(*parallel)
+	nbReqs, _ := strconv.Atoi(*requests)
+	valSize, _ := strconv.Atoi(*size)
 
 	switch *cmd {
 	case "get":
-		benchGetObject(*key, nb_parallel, nb_reqs)
+		benchGetObject(*key, nbParallel, nbReqs)
 	case "put":
-		benchPutObject(*key, nb_parallel, nb_reqs, val_size)
+		benchPutObject(*key, nbParallel, nbReqs, valSize)
 	case "del":
-		benchDelObject(*key, nb_parallel, nb_reqs)
+		benchDelObject(*key, nbParallel, nbReqs)
 	default:
 		fmt.Println("Usage: <cmd> <db> <key> | <value>")
 	}
