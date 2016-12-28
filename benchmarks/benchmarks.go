@@ -1,3 +1,21 @@
+// Package use for benchmarks easly the levelgrpc server
+// usage:
+//
+// benchmarks
+//
+//	 -c=<cmd> (put|get|del)
+//	 -p=<parallel requests>
+//	 -r=<numbers of requests>
+//	 -s=<size of the value> (use for put operations)
+//	 -k=<prefix for the key> (will be use for listing)
+//
+// exemples:
+// 	create two paralleles requests who will execute 1000 times the request del
+// 	benchmarks -c=del -r=1000 -p=2
+//
+// 	create two paralleles requests who will execute 1000 times the request put
+// 	benchmarks -c=put -r=1000 -p=2 -s=1024
+// operation with a value of size equal to 1024
 package main
 
 import (
