@@ -21,7 +21,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	pb "github.com/ThibaultRiviere/levelgrpc/client"
+	pb "github.com/ThibaultRiviere/levelgrpc/pkg/client"
 	str "github.com/dchest/uniuri"
 	"strconv"
 )

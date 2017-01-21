@@ -1,7 +1,7 @@
 package main
 
 import (
-	levelgrpc "github.com/ThibaultRiviere/levelgrpc/server"
+	levelgrpc "github.com/ThibaultRiviere/levelgrpc/pkg/server"
 	"log"
 	"net"
 )
