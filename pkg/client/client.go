@@ -11,12 +11,6 @@ import (
 	pb "github.com/ThibaultRiviere/levelgrpc/proto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"log"
-)
-
-const (
-	address     = "localhost:4242"
-	defaultName = "world"
 )
 
 // Client will handle the grpc communication with the levelgrpc server,
@@ -27,18 +21,13 @@ type Client struct {
 
 // NewClient will initialize the connection with the levelgrpc server
 // It will provide the different function of leveldb.
-//
-// TODO need to be configurable, (ip, port, ...)
-//
-// TODO need to be a leveldb interface
-func NewClient() (Client, error) {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+func NewClient(address string, options ...grpc.DialOption) (*Client, error) {
+	conn, err := grpc.Dial(address, options...)
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-		return Client{}, err
+		return nil, err
 	}
 
-	return Client{pb.NewLevelDBClient(conn)}, nil
+	return &Client{pb.NewLevelDBClient(conn)}, nil
 }
 
 // GetObject will get through the levelgrpc server the given key
@@ -49,7 +38,6 @@ func (c *Client) GetObject(key []byte) ([]byte, error) {
 	res, err := c.conn.Get(a, b)
 
 	if err != nil {
-		log.Fatalf("did not get: %v", err)
 		return nil, err
 	}
 	return res.GetValue(), nil
