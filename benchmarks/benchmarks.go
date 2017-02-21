@@ -26,6 +26,14 @@ import (
 	"strconv"
 )
 
+var (
+	cmd        = flag.String("c", "unknow", "command to execute")
+	key        = flag.String("k", "key/", "base for the key")
+	nbParallel = flag.Int("p", 1, "parallel reqs")
+	nbReqs     = flag.Int("r", 1, "nb reqs")
+	valSize    = flag.Int("s", 8, "size of the string for put bench")
+)
+
 func benchGetObject(key string, nbParallel int, nbReqs int) {
 
 	end := make(chan string, nbParallel)
@@ -112,25 +120,15 @@ func benchDelObject(key string, nbParallel int, nbReqs int) {
 }
 
 func main() {
-	cmd := flag.String("c", "unknow", "command to execute")
-	parallel := flag.String("p", "1", "parallel reqs")
-	requests := flag.String("r", "1", "nb reqs")
-	size := flag.String("s", "8", "size of the string for put bench")
-	key := flag.String("k", "key/", "base for the key")
-
 	flag.Parse()
-
-	nbParallel, _ := strconv.Atoi(*parallel)
-	nbReqs, _ := strconv.Atoi(*requests)
-	valSize, _ := strconv.Atoi(*size)
 
 	switch *cmd {
 	case "get":
-		benchGetObject(*key, nbParallel, nbReqs)
+		benchGetObject(*key, *nbParallel, *nbReqs)
 	case "put":
-		benchPutObject(*key, nbParallel, nbReqs, valSize)
+		benchPutObject(*key, *nbParallel, *nbReqs, *valSize)
 	case "del":
-		benchDelObject(*key, nbParallel, nbReqs)
+		benchDelObject(*key, *nbParallel, *nbReqs)
 	default:
 		fmt.Println("Usage: <cmd> <db> <key> | <value>")
 	}
