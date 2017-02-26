@@ -28,7 +28,7 @@ func (wrap dbWrap) Del(key []byte) error {
 
 func main() {
 
-	lis, err := net.Listen("tcp", ":4242")
+	lis, err := net.Listen("unix", "/tmp/levelgrpc.sock")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 		return

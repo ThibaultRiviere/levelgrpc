@@ -16,6 +16,9 @@
 // 	create two paralleles requests who will execute 1000 times the request put
 // 	benchmarks -c=put -r=1000 -p=2 -s=1024
 // operation with a value of size equal to 1024
+//
+// precise the server addr use the flag addr for the address and type the type of the socket
+// benchmarks -c=put -r=1000 -addr=localhost -type=tcp
 package main
 
 import (
@@ -23,10 +26,15 @@ import (
 	"fmt"
 	pb "github.com/ThibaultRiviere/levelgrpc/pkg/client"
 	str "github.com/dchest/uniuri"
+	"google.golang.org/grpc"
+	"net"
 	"strconv"
+	"time"
 )
 
 var (
+	addr       = flag.String("addr", "/tmp/levelgrpc.sock", "address of the server")
+	typeSock   = flag.String("type", "unix", "type of the socket")
 	cmd        = flag.String("c", "unknow", "command to execute")
 	key        = flag.String("k", "key/", "base for the key")
 	nbParallel = flag.Int("p", 1, "parallel reqs")
@@ -34,18 +42,22 @@ var (
 	valSize    = flag.Int("s", 8, "size of the string for put bench")
 )
 
+func getUnixSocket(address string, t time.Duration) (net.Conn, error) {
+	return net.Dial(*typeSock, address)
+}
+
 func benchGetObject(key string, nbParallel int, nbReqs int) {
 
 	end := make(chan string, nbParallel)
 
 	for i := 0; i < nbParallel; i++ {
-		client, err := pb.NewClient()
+		client, err := pb.NewClient(*addr, grpc.WithInsecure(), grpc.WithDialer(getUnixSocket))
 		if err != nil {
 			end <- "error can't create client with leveldb server"
 			return
 		}
 
-		go func(c pb.Client, k string, e chan string, max int) {
+		go func(c *pb.Client, k string, e chan string, max int) {
 			for i := 0; i < max; i++ {
 				keyI := []byte(k + strconv.Itoa(i))
 				_, err := c.GetObject(keyI)
@@ -68,13 +80,13 @@ func benchPutObject(key string, nbParallel int, nbReqs int, size int) {
 	value := []byte(str.NewLen(size))
 
 	for i := 0; i < nbParallel; i++ {
-		client, err := pb.NewClient()
+		client, err := pb.NewClient(*addr, grpc.WithInsecure(), grpc.WithDialer(getUnixSocket))
 		if err != nil {
 			end <- "error can't create client with leveldb server"
 			return
 		}
 
-		go func(c pb.Client, k string, v []byte, e chan string, max int) {
+		go func(c *pb.Client, k string, v []byte, e chan string, max int) {
 			for i := 0; i < max; i++ {
 				keyI := []byte(k + strconv.Itoa(i))
 				err := c.PutObject(keyI, v)
@@ -96,13 +108,13 @@ func benchDelObject(key string, nbParallel int, nbReqs int) {
 	end := make(chan string, nbParallel)
 
 	for i := 0; i < nbParallel; i++ {
-		client, err := pb.NewClient()
+		client, err := pb.NewClient(*addr, grpc.WithInsecure(), grpc.WithDialer(getUnixSocket))
 		if err != nil {
 			end <- "error can't create client with leveldb server"
 			return
 		}
 
-		go func(c pb.Client, k string, e chan string, max int) {
+		go func(c *pb.Client, k string, e chan string, max int) {
 			for i := 0; i < max; i++ {
 				keyI := []byte(k + strconv.Itoa(i))
 				err := c.DelObject(keyI)
